@@ -1,0 +1,34 @@
+---
+- name: Check if swap exists
+  command: swapon --show
+  register: swap_status
+  changed_when: false
+
+- name: Create swap file if not exists
+  ansible.builtin.command: "fallocate -l {{ swap_size }} {{ swap_file }}"
+  when: swap_status.stdout == ""
+
+- name: Set correct permissions on swapfile
+  file:
+    path: "{{ swap_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  when: swap_status.stdout == ""
+
+- name: Make swap
+  command: "mkswap {{ swap_file }}"
+  when: swap_status.stdout == ""
+
+- name: Enable swap
+  command: "swapon {{ swap_file }}"
+  when: swap_status.stdout == ""
+
+- name: Add swap to fstab
+  mount:
+    name: none
+    src: "{{ swap_file }}"
+    fstype: swap
+    opts: sw
+    state: present
+  when: swap_status.stdout == ""

@@ -1,0 +1,10 @@
+<html>
+  <head>
+    <title>Nginx on {{ ansible_hostname }}</title>
+  </head>
+  <body>
+    <h1>Hello from {{ ansible_hostname }}</h1>
+    <p>IP: {{ ansible_default_ipv4.address }}</p>
+    <p>User: {{ ansible_user }}</p>
+  </body>
+</html>

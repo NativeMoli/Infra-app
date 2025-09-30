@@ -1,0 +1,4 @@
+---
+# Змінні за замовчуванням
+swap_file: /swapfile
+swap_size: 1G
