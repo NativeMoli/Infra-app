@@ -1,21 +1,21 @@
-#---
-#- name: Update system on all hosts
-#  hosts: all
-#  become: yes
-#  roles:
-#    - system_update
-#
-#- name: Setup Nginx on web servers
-#  hosts: web
-#  become: yes
-#  roles:
-#    - nginx
-#
-#- name: Setup runner servers (Docker + Jenkins)
-#  hosts: runner
-#  become: yes
-#  roles:
-#    - runner
+---
+- name: Update system on all hosts
+  hosts: all
+  become: yes
+  roles:
+    - system_update
+
+- name: Setup Nginx on web servers
+  hosts: web
+  become: yes
+  roles:
+    - nginx
+
+- name: Setup runner servers (Docker + Jenkins)
+  hosts: runner
+  become: yes
+  roles:
+    - runner
 
 - hosts: runner
   become: yes

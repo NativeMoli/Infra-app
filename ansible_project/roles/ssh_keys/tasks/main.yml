@@ -1,0 +1,14 @@
+---
+- name: Ensure .ssh directory exists
+  file:
+    path: /home/ubuntu/.ssh
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: 0700
+
+- name: Add Bastion public key to authorized_keys
+  authorized_key:
+    user: ubuntu
+    key: "{{ lookup('file', '/home/ubuntu/.ssh/id_rsa.pub') }}"
+    state: present
