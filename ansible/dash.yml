@@ -1,0 +1,13 @@
+---
+- name: Deploy full monitoring stack
+  hosts: all
+  become: yes
+  roles:
+    - node_exporter
+
+- name: Configure Prometheus and Grafana on monitoring node
+  hosts: 192.168.0.66   # головний сервер моніторингу
+  become: yes
+  roles:
+    - prometheus
+    - grafana
