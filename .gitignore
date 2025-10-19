@@ -58,4 +58,4 @@ jenkins.yml
 
 frontend/
 backend/
-Ansible/roles/geerlingguy.docker/
+ansible/roles/geerlingguy.docker/

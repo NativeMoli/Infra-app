@@ -49,15 +49,34 @@
         state: present
         update_cache: yes
 
-      tasks:
-          - name: Скопіювати docker-compose.yml
-            copy:
-              dest: /opt/app/docker-compose.yml
-              content: |
-                {{ lookup('file', 'docker-compose.yml') }}
+    - name: Додати користувача ubuntu до групи docker
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
 
-          - name: Скопіювати nginx.conf
-            copy:
-              dest: /opt/app/nginx.conf
-              content: |
-                {{ lookup('file', 'nginx.conf') }}
+    - name: Створити директорії для додатка
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      loop:
+        - /opt/app
+        - /opt/app/frontend
+        - /opt/app/backend
+
+    - name: Скопіювати docker-compose.yml
+      copy:
+        dest: /opt/app/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+        content: "{{ lookup('file', 'docker-compose.yml') }}"
+
+    - name: Скопіювати nginx.conf
+      copy:
+        dest: /opt/app/nginx.conf
+        owner: ubuntu
+        group: ubuntu
+        content: "{{ lookup('file', 'nginx.conf') }}"

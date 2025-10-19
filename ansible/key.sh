@@ -3,7 +3,7 @@
 # Очищує старі ключі з known_hosts, додає нові та перевіряє підключення
 
 BASTION_USER=ubuntu
-BASTION_HOST=34.76.147.235
+BASTION_HOST=34.38.79.215
 
 INTERNAL_HOSTS=("192.168.0.66" "192.168.0.67")
 SSH_KEY="$HOME/.ssh/id_rsa.pub"

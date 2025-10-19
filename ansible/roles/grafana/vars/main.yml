@@ -1,0 +1,6 @@
+grafana_repo: "https://packages.grafana.com/oss/deb"
+grafana_admin_user: "admin"
+grafana_admin_password: "admin"
+grafana_api_url: "http://localhost:3000"
+node_exporter_dashboard_json_url: "https://grafana.com/api/dashboards/1860/revisions/31/download"
+prometheus_url: "http://localhost:9090"
