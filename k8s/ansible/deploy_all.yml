@@ -1,0 +1,30 @@
+- hosts: localhost
+  vars:
+    kubeconfig: "/home/ubuntu/.kube/config"
+  tasks:
+
+    - name: Create namespace
+      shell: kubectl apply -f k8s_yaml/namespace.yml --kubeconfig {{ kubeconfig }}
+      register: ns
+    - debug: var=ns.stdout
+
+    - name: Deploy MySQL
+      shell: kubectl apply -f k8s_yaml/mysql.yml --kubeconfig {{ kubeconfig }}
+      register: mysql
+    - debug: var=mysql.stdout
+
+    - name: Deploy Backend
+      shell: kubectl apply -f k8s_yaml/backend.yml --kubeconfig {{ kubeconfig }}
+      register: backend
+    - debug: var=backend.stdout
+
+    - name: Deploy Frontend
+      shell: kubectl apply -f k8s_yaml/frontend.yml --kubeconfig {{ kubeconfig }}
+      register: frontend
+    - debug: var=frontend.stdout
+
+    - name: Deploy ingress
+      shell: kubectl apply -f k8s_yaml/ingress.yml --kubeconfig {{ kubeconfig }}
+      register: ingress
+    - debug: var=ingress.stdout
+

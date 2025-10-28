@@ -1,0 +1,62 @@
+---
+- name: Deploy Grafana Ingress with TLS
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    grafana_namespace: eschool
+    grafana_service_name: grafana
+    grafana_host: grafana.godofpentesting.pp.ua
+
+  tasks:
+    - name: Ensure cert-manager ClusterIssuer exists (Let's Encrypt Staging)
+      copy:
+        dest: /tmp/clusterissuer.yml
+        content: |
+          apiVersion: cert-manager.io/v1
+          kind: ClusterIssuer
+          metadata:
+            name: letsencrypt-staging
+          spec:
+            acme:
+              server: https://acme-staging-v02.api.letsencrypt.org/directory
+              email: elementalmoli@gmail.com   
+              privateKeySecretRef:
+                name: letsencrypt-staging
+              solvers:
+                - http01:
+                    ingress:
+                      class: nginx
+    - name: Apply ClusterIssuer
+      shell: kubectl apply -f /tmp/clusterissuer.yml --kubeconfig /home/ubuntu/.kube/config
+
+    - name: Create Grafana Ingress with TLS
+      copy:
+        dest: /tmp/grafana_ingress.yml
+        content: |
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: grafana
+            namespace: {{ grafana_namespace }}
+            annotations:
+              kubernetes.io/ingress.class: nginx
+              cert-manager.io/cluster-issuer: letsencrypt-staging
+          spec:
+            rules:
+              - host: {{ grafana_host }}
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: {{ grafana_service_name }}
+                          port:
+                            number: 3000
+            tls:
+              - hosts:
+                  - {{ grafana_host }}
+                secretName: grafana-tls
+    - name: Apply Grafana Ingress
+      shell: kubectl apply -f /tmp/grafana_ingress.yml --kubeconfig /home/ubuntu/.kube/config

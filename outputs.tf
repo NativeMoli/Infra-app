@@ -29,5 +29,7 @@ output "database_password" {
 }
 
 output "cloudsql_dns" {
-  value = google_dns_record_set.sql_dns.name
+  value = google_sql_database_instance.db_instance.ip_address[0].ip_address
 }
+
+

@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        DEPLOY_USER = "ubuntu"
+        BASTION_HOST = "192.168.0.2"
+        WEB_HOST = "192.168.0.67"
+        SSH_KEY = "/var/lib/jenkins/.ssh/jenkins_rsa"
+        APP_DIR = "/opt/app"
+
+        FRONTEND_REPO = "https://github.com/NativeMoli/frontend.git"
+        BACKEND_REPO = "https://github.com/NativeMoli/backend.git"
+        TARGET_BRANCH = "Dockerfile"
+
+        FRONTEND_IMAGE = "bilkovsky/frontend"
+        BACKEND_IMAGE = "bilkovsky/backend"
+        DOCKER_CREDS = "dockerhub-creds"
+    }
+
+    stages {
+        stage('Build & Push Docker images') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+
+                    # === FRONTEND ===
+                    docker build -t ${FRONTEND_IMAGE}:latest https://github.com/NativeMoli/frontend.git#${TARGET_BRANCH}
+                    docker push ${FRONTEND_IMAGE}:latest
+
+                    # === BACKEND ===
+                    docker build -t ${BACKEND_IMAGE}:latest https://github.com/NativeMoli/backend.git#${TARGET_BRANCH}
+                    docker push ${BACKEND_IMAGE}:latest
+                    """
+                }
+            }
+        }
+
+        stage('Deploy via Docker Compose') {
+            steps {
+                sh """
+                ssh -i ${SSH_KEY} -o "ProxyCommand=ssh -i ${SSH_KEY} -W %h:%p ${DEPLOY_USER}@${BASTION_HOST}" ${DEPLOY_USER}@${WEB_HOST} '
+                    cd ${APP_DIR}
+                    sudo docker compose pull
+                    sudo docker compose down || true
+                    sudo docker compose up -d
+                '
+                """
+            }
+        }
+    }
+
+    post {
+        success { echo "✅ Deployment finished successfully!" }
+        failure { echo "❌ Deployment failed!" }
+    }
+}

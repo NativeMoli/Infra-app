@@ -1,0 +1,58 @@
+---
+- name: Deploy NGINX Ingress Controller on Kubernetes (GKE)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    kubeconfig: "/home/ubuntu/.kube/config"
+
+  tasks:
+
+    - name: Ensure ingress-nginx namespace exists
+      shell: |
+        kubectl get namespace ingress-nginx --kubeconfig {{ kubeconfig }} || \
+        kubectl create namespace ingress-nginx --kubeconfig {{ kubeconfig }}
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Add ingress-nginx Helm repo
+      shell: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Update Helm repositories
+      shell: helm repo update
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Install or upgrade NGINX Ingress Controller
+      shell: |
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+          --namespace ingress-nginx \
+          --create-namespace \
+          --set controller.publishService.enabled=true
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Wait for Ingress Controller pods to be ready
+      shell: |
+        kubectl wait --namespace ingress-nginx \
+          --for=condition=Ready pod \
+          --selector=app.kubernetes.io/component=controller \
+          --timeout=180s
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Get external IP of the Ingress Controller
+      shell: |
+        kubectl get svc ingress-nginx-controller \
+          -n ingress-nginx \
+          -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+      register: ingress_ip
+      environment:
+        KUBECONFIG: "{{ kubeconfig }}"
+
+    - name: Show the Ingress external I
+      debug:
+        msg: "NGINX Ingress External IP: {{ ingress_ip.stdout }}"
