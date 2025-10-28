@@ -6,8 +6,14 @@
     - node_exporter
 
 - name: Configure Prometheus and Grafana on monitoring node
-  hosts: 192.168.0.66   # головний сервер моніторингу
+  hosts: 192.168.0.66 # головний сервер моніторингу
   become: yes
+  vars:
+    grafana_repo: "https://packages.grafana.com/oss/deb"
+    grafana_api_url: "http://localhost:3000"
+    grafana_admin_user: "admin"
+    grafana_admin_password: "admin"
+    node_exporter_dashboard_json_url: "https://raw.githubusercontent.com/grafana/graphite-dashboards/main/dashboards/node-exporter-full.json"
   roles:
     - prometheus
     - grafana

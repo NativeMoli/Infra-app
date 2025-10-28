@@ -2,7 +2,7 @@
 
 # Генерація inventory.ini для Ansible
 resource "local_file" "ansible_inventory" {
-  filename = "${path.module}./ansible/inventory.ini"
+  filename = "${path.module}/ansible/inventory.ini"
 
   content = <<EOT
 [runner]

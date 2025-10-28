@@ -4,7 +4,7 @@ set -euo pipefail
 # -----------------------
 # Конфігурація
 # -----------------------
-BASTION_PUBLIC="34.38.79.215"   # публічний IP Bastion
+BASTION_PUBLIC="34.77.91.241"   # публічний IP Bastion
 BASTION_PRIVATE="192.168.0.2"   # приватний IP Bastion для внутрішніх підключень
 JENKINS_HOST="192.168.0.66"     # приватний IP Jenkins
 WEB_HOST="192.168.0.67"         # приватний IP Web
