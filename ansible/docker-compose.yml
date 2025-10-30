@@ -14,7 +14,7 @@ services:
     container_name: backend
     image: bilkovsky/backend:latest
     environment:
-      - DATASOURCE_URL=jdbc:mysql://172.21.0.3:3306/eschool?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      - DATASOURCE_URL=jdbc:mysql://10.205.0.3:3306/eschool?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
       - DATASOURCE_USERNAME=root
       - DATASOURCE_PASSWORD=root
     ports:

@@ -1,6 +1,6 @@
 Короткий опис інфраструктури
 
-VPC my-vpc із 2 public і 2 private сабнетами.
+VPC my-vpc із 1 public і 3 private сабнетами.
 
 Bastion у public-a з зовнішнім IP (доступ лише з свого IP через фаєрвол).
 
@@ -46,9 +46,9 @@ ssh -i /home/ubuntu/.ssh/id_rsa \
 -L 8080:192.168.0.66:8080 \
 -L 8082:192.168.0.67:80 \
 -L 8081:192.168.0.67:8080 \
-ubuntu@34.77.91.241                    (Прокидуєм зєднання відразу на СІCD сервер і на майбутьнє на web)
+ubuntu@34.78.193.240                    (Прокидуєм зєднання відразу на СІCD сервер і на майбутьнє на web)
 
-ssh -i /home/ubuntu/.ssh/id_rsa -J ubuntu@34.77.91.241   ubuntu@192.168.0.66 (Заходим на CICD )
+ssh -i /home/ubuntu/.ssh/id_rsa -J ubuntu@34.78.193.240  ubuntu@192.168.0.66 (Заходим на CICD )
 sudo cat  /var/lib/jenkins/secrets/initialAdminPassword 
 В  Jenkins встановлюємо Docker Pipeline  та Прописуєм креди від Docker Hub.
 Сворюєм item Копіюєм Pipeline - Jenkinsfile1 або пушим з Git.-Запускаєм.
@@ -62,4 +62,4 @@ curl -X POST http://admin:admin@localhost:3000/api/dashboards/db \
 -d @/tmp/grafana_import.json
 
 
-ssh -L 3000:192.168.0.66:3000 -J ubuntu@34.77.91.241 ubuntu@192.168.0.66
+ssh -L 3001:192.168.0.66:3000 -J ubuntu@34.78.193.240   ubuntu@192.168.0.66
