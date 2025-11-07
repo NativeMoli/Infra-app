@@ -1,0 +1,73 @@
+
+    # --- Install dependencies ---
+    - name: Install Grafana dependencies
+      apt:
+        name: [apt-transport-https, software-properties-common, wget, curl]
+        state: present
+        update_cache: yes
+
+    # --- Add Grafana repository ---
+    - name: Add Grafana GPG key
+      ansible.builtin.apt_key:
+        url: https://packages.grafana.com/gpg.key
+        state: present
+
+    - name: Add Grafana repo
+      ansible.builtin.apt_repository:
+        repo: "deb {{ grafana_repo }} stable main"
+        state: present
+
+    # --- Install Grafana ---
+    - name: Install Grafana
+      apt:
+        name: grafana
+        state: present
+        update_cache: yes
+
+    - name: Enable and start Grafana
+      systemd:
+        name: grafana-server
+        enabled: yes
+        state: started
+
+    # --- Wait for Grafana API to be up ---
+    - name: Wait for Grafana to start
+      uri:
+        url: "{{ grafana_api_url }}/api/health"
+        status_code: 200
+        timeout: 30
+      register: grafana_health
+      retries: 10
+      delay: 5
+      until: grafana_health.status == 200
+
+    # --- Download Node Exporter dashboard ---
+    - name: Create monitoring directory
+      file:
+        path: /opt/monitoring
+        state: directory
+        mode: '0755'
+
+    - name: Download Node Exporter dashboard JSON
+      ansible.builtin.get_url:
+        url: "{{ node_exporter_dashboard_json_url }}"
+        dest: /opt/monitoring/node_exporter_dashboard.json
+        mode: '0644'
+
+    # --- Import dashboard into Grafana ---
+    - name: Prepare Grafana dashboard import JSON
+      shell: |
+        jq -n --argfile d /opt/monitoring/node_exporter_dashboard.json '{dashboard: $d, overwrite: true}' > /tmp/grafana_import.json
+
+    - name: Import dashboard into Grafana
+      uri:
+        url: "{{ grafana_api_url }}/api/dashboards/db"
+        method: POST
+        user: "{{ grafana_admin_user }}"
+        password: "{{ grafana_admin_password }}"
+        force_basic_auth: true
+        headers:
+          Content-Type: "application/json"
+        body: "{{ lookup('file', '/tmp/grafana_import.json') }}"
+        status_code: [ 200, 412 ]
+        validate_certs: false

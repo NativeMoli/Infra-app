@@ -1,58 +1,54 @@
+version: '3.9'
+
 services:
   frontend:
     container_name: frontend
-    image: front:v1.0
+    image: bilkovsky/frontend:latest
     restart: unless-stopped
-    ports:
-      - '80:80'
     environment:
-      - BACKEND_URL=http://backend:8080
-    volumes:
-      - ../frontend/nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      backend:
-        condition: service_started
+      - BACKEND_URL=http://nginx
     networks:
-      app_network:
-        aliases:
-          - frontend
+      - app_network
 
   backend:
     container_name: backend
-    image: back:v1
+    image: bilkovsky/backend:latest
     restart: unless-stopped
-    ports:
-      - '8080:8080'
     environment:
-      - MYSQL_DATABASE=eschool
-      - DATASOURCE_URL=jdbc:mysql://eschool-mysql:3306/eschool?useUnicode=true&characterEncoding=utf8
-      - DATASOURCE_USERNAME=root
-      - DATASOURCE_PASSWORD=root
-    depends_on:
-      eschool-mysql:
-        condition: service_healthy
-    networks:
-      app_network:
-        aliases:
-          - backend
-
-  eschool-mysql:
-    container_name: eschool-mysql
-    image: mysql:lts
-    restart: unless-stopped
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=eschool
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - DATASOURCE_URL=jdbc:mysql://10.97.0.3:3306/eschool?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      - DATASOURCE_USERNAME=appuser
+      - DATASOURCE_PASSWORD=StrongPassword123!
     networks:
       - app_network
+
+  frontend-init:
+    image: bilkovsky/frontend:latest
+    depends_on:
+      - frontend
+    volumes:
+      - frontend-data:/usr/share/nginx/html
+    command: ["sh", "-c", "cp -r /usr/share/nginx/html/* /usr/share/nginx/html/"]
+    networks:
+      - app_network
+    restart: "no"
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    depends_on:
+      - backend
+      - frontend-init
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - frontend-data:/usr/share/nginx/html:ro
+    networks:
+      - app_network
+    restart: unless-stopped
+
+volumes:
+  frontend-data:
 
 networks:
   app_network:

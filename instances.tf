@@ -26,7 +26,8 @@ resource "google_compute_instance" "bastion" {
 # Web server (private, Nginx)
 resource "google_compute_instance" "web" {
   name         = "web-instance"
-  machine_type = "e2-micro"
+  machine_type = "e2-medium"
+  allow_stopping_for_update = true
   zone         = var.zone_b
 
   boot_disk {
@@ -38,7 +39,7 @@ resource "google_compute_instance" "web" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.private_a.id
-    # No external IP
+    network_ip = "192.168.0.67"  # конкретний приватний IP
   }
 
   metadata = {
@@ -63,7 +64,7 @@ resource "google_compute_instance" "cicd" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.private_a.id
-    # No external IP
+    network_ip = "192.168.0.66"  # конкретний приватний IP
   }
 
   metadata = {
